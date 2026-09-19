@@ -29,5 +29,5 @@ For visual changes, add before/after screenshots or a short capture.
 ## Rights
 
 - [ ] I have the right to submit this work under Apache-2.0
+- [ ] My commits include a DCO `Signed-off-by` line (`git commit -s`)
 - [ ] Any third-party assets have exact creator, source, license, and modification details in `THIRD_PARTY_NOTICES.md`
-

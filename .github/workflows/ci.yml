@@ -9,6 +9,21 @@ permissions:
   contents: read
 
 jobs:
+  dco:
+    if: github.event_name == 'pull_request'
+    name: DCO sign-off
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out trusted verification script
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+      - name: Fetch proposed commits
+        run: git fetch origin pull/${{ github.event.pull_request.number }}/head:pr-head
+      - name: Verify contributor sign-offs
+        run: node scripts/check-dco.mjs "${{ github.event.pull_request.base.sha }}" pr-head
+
   check:
     runs-on: ubuntu-latest
     steps:
@@ -23,4 +38,3 @@ jobs:
         run: npm ci
       - name: Type-check and build
         run: npm run check
-

@@ -70,11 +70,15 @@ npm run preview
 
 Human-authored work is welcome. If a contribution uses an AI model, that model must run locally on contributor-controlled hardware—no hosted inference APIs or cloud model services. Read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request. The optional local workflow is documented in [tools/deadgrid-harness/README.md](tools/deadgrid-harness/README.md).
 
+Contributors work in their own fork and propose changes through pull requests. Automated checks and maintainer review protect the official branch, so experimenting in a fork cannot damage the released game. Project decisions and maintainer roles are described in [GOVERNANCE.md](GOVERNANCE.md).
+
 Good first contributions include bug fixes, accessibility, performance, test coverage, mission clarity, environmental variety, and replacing or optimizing art with clearly licensed assets.
 
 ## License and assets
 
-The project code and original repository material are available under the [Apache License 2.0](LICENSE). Third-party art and audio retain their own licenses, primarily CC BY 4.0 and CC0; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) before redistributing the game.
+The project code and original repository material are available under the [Apache License 2.0](LICENSE). Contributors retain copyright in their original work and license it to the community under those terms. The [NOTICE](NOTICE) file records project attribution, and [TRADEMARKS.md](TRADEMARKS.md) explains use of the DEADGRID name and branding.
+
+Third-party art and audio retain their own licenses, primarily CC BY 4.0 and CC0; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) before redistributing the game.
 
 The raw asset intake directory is intentionally excluded from the repository. Only runtime assets with verified embedded or accompanying license information are published.
 
