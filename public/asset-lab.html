@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEADGRID — Asset Lab</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0c10; color: #c8ccd4; font-family: 'Consolas', 'Menlo', monospace; overflow: hidden; }
+    #canvas { display: block; width: 100vw; height: 100vh; }
+    #panel {
+      position: fixed; top: 0; right: 0; width: 340px; height: 100vh;
+      background: rgba(10,12,16,0.92); border-left: 1px solid #1e2228;
+      padding: 16px; overflow-y: auto; z-index: 10;
+    }
+    #panel h1 { font-size: 14px; color: #e8a33d; margin-bottom: 12px; letter-spacing: 1px; }
+    .section { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #1e2228; }
+    .section h2 { font-size: 11px; color: #6a7080; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+    .row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; }
+    .row .label { color: #6a7080; }
+    .row .value { color: #c8ccd4; }
+    .row .value.warn { color: #e8a33d; }
+    .row .value.bad { color: #e84040; }
+    .row .value.ok { color: #40c860; }
+    #filename { font-size: 13px; color: #e8a33d; word-break: break-all; margin-bottom: 8px; }
+    #classification { font-size: 12px; padding: 6px 8px; background: #141820; border-radius: 4px; margin-bottom: 8px; }
+    .btn-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    button {
+      flex: 1; padding: 8px 12px; background: #1a1e26; color: #c8ccd4;
+      border: 1px solid #2a2e36; border-radius: 4px; cursor: pointer;
+      font-family: inherit; font-size: 12px;
+    }
+    button:hover { background: #242830; border-color: #e8a33d; }
+    button:active { background: #2a2e36; }
+    #scale-control { margin-bottom: 12px; }
+    #scale-control label { font-size: 11px; color: #6a7080; display: block; margin-bottom: 4px; }
+    #scale-slider { width: 100%; }
+    #scale-value { font-size: 12px; color: #e8a33d; }
+    #mesh-list { max-height: 200px; overflow-y: auto; font-size: 11px; }
+    .mesh-item { padding: 3px 6px; border-bottom: 1px solid #141820; display: flex; justify-content: space-between; }
+    .mesh-item .name { color: #8a90a0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+    .mesh-item .tris { color: #6a7080; }
+    #status { position: fixed; bottom: 12px; left: 12px; font-size: 11px; color: #6a7080; z-index: 10; }
+    #asset-count { position: fixed; top: 12px; left: 12px; font-size: 12px; color: #e8a33d; z-index: 10; }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div id="asset-count"></div>
+  <div id="panel">
+    <h1>DEADGRID — ASSET LAB</h1>
+    <div class="section">
+      <div id="filename">—</div>
+      <div id="classification">—</div>
+    </div>
+    <div class="section">
+      <h2>Dimensions (raw)</h2>
+      <div class="row"><span class="label">Width (X)</span><span class="value" id="dim-w">—</span></div>
+      <div class="row"><span class="label">Height (Y)</span><span class="value" id="dim-h">—</span></div>
+      <div class="row"><span class="label">Depth (Z)</span><span class="value" id="dim-d">—</span></div>
+    </div>
+    <div class="section">
+      <h2>Statistics</h2>
+      <div class="row"><span class="label">Meshes</span><span class="value" id="stat-meshes">—</span></div>
+      <div class="row"><span class="label">Triangles</span><span class="value" id="stat-tris">—</span></div>
+      <div class="row"><span class="label">Materials</span><span class="value" id="stat-mats">—</span></div>
+      <div class="row"><span class="label">Textures</span><span class="value" id="stat-textures">—</span></div>
+    </div>
+    <div class="section">
+      <h2>Scale</h2>
+      <div id="scale-control">
+        <label>Scale factor: <span id="scale-value">1.000</span></label>
+        <input type="range" id="scale-slider" min="0.001" max="5" step="0.001" value="1" />
+      </div>
+      <div class="row"><span class="label">Scaled W</span><span class="value" id="scaled-w">—</span></div>
+      <div class="row"><span class="label">Scaled H</span><span class="value" id="scaled-h">—</span></div>
+      <div class="row"><span class="label">Scaled D</span><span class="value" id="scaled-d">—</span></div>
+    </div>
+    <div class="section">
+      <h2>Controls</h2>
+      <div class="btn-row">
+        <button id="btn-prev">◀ PREV</button>
+        <button id="btn-next">NEXT ▶</button>
+      </div>
+      <div class="btn-row">
+        <button id="btn-reset">RESET VIEW</button>
+      </div>
+    </div>
+    <div class="section">
+      <h2>Scene Graph</h2>
+      <div id="mesh-list"></div>
+    </div>
+  </div>
+  <div id="status">Loading…</div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "/node_modules/three/build/three.module.js",
+      "three/addons/": "/node_modules/three/examples/jsm/"
+    }
+  }
+  </script>
+  <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+    // --- asset list (all runtime GLBs) ---
+    const ASSETS = [
+      { id: 'generator',     path: 'assets/runtime/industrial/generator.glb',     label: 'Portable Generator' },
+      { id: 'radio_tower',   path: 'assets/runtime/structures/radio_tower.glb',   label: 'Radio Tower' },
+      { id: 'outpost_kit',   path: 'assets/runtime/military/outpost_kit.glb',     label: 'Military Outpost Kit' },
+      { id: 'crashed_car',   path: 'assets/runtime/vehicles/crashed_car.glb',     label: 'Crashed Car' },
+      { id: 'zombie_truck',  path: 'assets/runtime/vehicles/zombie_truck.glb',    label: 'Zombie Pickup Truck' },
+      { id: 'zombie_mummy',  path: 'assets/runtime/characters/zombie_mummy.glb',  label: 'Zombie Mummy' },
+    ];
+
+    let currentIdx = 0;
+    let currentAsset = null;
+    let currentScale = 1.0;
+    let rawDims = { w: 0, h: 0, d: 0 };
+
+    // --- scene setup ---
+    const canvas = document.getElementById('canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.0;
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x1a1e26);
+    scene.fog = new THREE.Fog(0x1a1e26, 50, 200);
+
+    // neutral environment lighting
+    const pmremGenerator = new THREE.PMREMGenerator(renderer);
+    const roomEnv = new RoomEnvironment();
+    scene.environment = pmremGenerator.fromScene(roomEnv, 0.04).texture;
+    roomEnv.dispose();
+
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+    camera.position.set(8, 6, 8);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.target.set(0, 1, 0);
+
+    // --- ground plane ---
+    const groundGeo = new THREE.PlaneGeometry(200, 200);
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a2e36, roughness: 0.9, metalness: 0.0 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI / 2;
+    ground.receiveShadow = true;
+    scene.add(ground);
+
+    // grid
+    const grid = new THREE.GridHelper(100, 100, 0x3a3e46, 0x2a2e36);
+    grid.position.y = 0.01;
+    scene.add(grid);
+
+    // --- XYZ axes ---
+    const axes = new THREE.AxesHelper(5);
+    scene.add(axes);
+
+    // --- 1-meter reference cube ---
+    const refCubeGeo = new THREE.BoxGeometry(1, 1, 1);
+    const refCubeMat = new THREE.MeshStandardMaterial({ color: 0x40c860, transparent: true, opacity: 0.3, roughness: 0.5 });
+    const refCube = new THREE.Mesh(refCubeGeo, refCubeMat);
+    refCube.position.set(-3, 0.5, -3);
+    scene.add(refCube);
+    const refCubeEdges = new THREE.LineSegments(
+      new THREE.EdgesGeometry(refCubeGeo),
+      new THREE.LineBasicMaterial({ color: 0x40c860 })
+    );
+    refCube.add(refCubeEdges);
+
+    // --- bounding box helper ---
+    let bboxHelper = null;
+
+    // --- lights ---
+    const ambient = new THREE.AmbientLight(0xffffff, 0.4);
+    scene.add(ambient);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    dirLight.position.set(10, 15, 10);
+    dirLight.castShadow = true;
+    dirLight.shadow.mapSize.set(2048, 2048);
+    dirLight.shadow.camera.near = 0.5;
+    dirLight.shadow.camera.far = 50;
+    dirLight.shadow.camera.left = -20;
+    dirLight.shadow.camera.right = 20;
+    dirLight.shadow.camera.top = 20;
+    dirLight.shadow.camera.bottom = -20;
+    scene.add(dirLight);
+    const fillLight = new THREE.DirectionalLight(0x8090b0, 0.3);
+    fillLight.position.set(-10, 5, -10);
+    scene.add(fillLight);
+
+    // --- GLB loader ---
+    const loader = new GLTFLoader();
+
+    function clearAsset() {
+      if (currentAsset) {
+        scene.remove(currentAsset);
+        currentAsset.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.geometry?.dispose();
+            if (Array.isArray(child.material)) child.material.forEach((m) => m.dispose());
+            else child.material?.dispose();
+          }
+        });
+        currentAsset = null;
+      }
+      if (bboxHelper) {
+        scene.remove(bboxHelper);
+        bboxHelper.dispose();
+        bboxHelper = null;
+      }
+    }
+
+    function classifyAsset(scene, dims) {
+      let meshCount = 0;
+      let triCount = 0;
+      const names = new Set();
+      scene.traverse((c) => {
+        if (c.isMesh) {
+          meshCount++;
+          const geo = c.geometry;
+          if (geo.index) triCount += geo.index.count / 3;
+          else if (geo.attributes.position) triCount += geo.attributes.position.count / 3;
+          if (c.name) names.add(c.name);
+        }
+      });
+      const maxDim = Math.max(dims.w, dims.h, dims.d);
+      const minDim = Math.min(dims.w, dims.h, dims.d);
+
+      // Heuristic classification
+      if (meshCount > 50 && maxDim > 20) return { type: 'D — Modular Structure Kit', detail: `${meshCount} meshes, ${maxDim.toFixed(1)}m span` };
+      if (meshCount > 30 && maxDim > 10) return { type: 'C — Complete Example/Showcase Scene', detail: `${meshCount} meshes, ${maxDim.toFixed(1)}m span` };
+      if (meshCount > 15) return { type: 'B — Multiple Independent Props', detail: `${meshCount} meshes` };
+      if (maxDim > 15) return { type: 'D — Large Structure', detail: `${maxDim.toFixed(1)}m tall` };
+      if (maxDim > 3 && maxDim < 15) return { type: 'A — Single Prop (Large)', detail: `${maxDim.toFixed(1)}m` };
+      if (maxDim <= 3) return { type: 'A — Single Prop', detail: `${maxDim.toFixed(1)}m` };
+      return { type: 'Unknown', detail: `${meshCount} meshes, ${maxDim.toFixed(1)}m` };
+    }
+
+    function loadAsset(idx) {
+      currentIdx = ((idx % ASSETS.length) + ASSETS.length) % ASSETS.length;
+      const asset = ASSETS[currentIdx];
+      clearAsset();
+      currentScale = 1.0;
+      document.getElementById('scale-slider').value = '1';
+      document.getElementById('scale-value').textContent = '1.000';
+      document.getElementById('status').textContent = `Loading ${asset.label}…`;
+      document.getElementById('filename').textContent = asset.path;
+      document.getElementById('asset-count').textContent = `${currentIdx + 1} / ${ASSETS.length}`;
+
+      loader.load(asset.path, (gltf) => {
+        currentAsset = gltf.scene;
+
+        // Compute raw dimensions
+        const box = new THREE.Box3().setFromObject(currentAsset);
+        const size = box.getSize(new THREE.Vector3());
+        rawDims = { w: size.x, h: size.y, d: size.z };
+
+        // Center at origin (XZ), keep Y at bottom
+        const center = box.getCenter(new THREE.Vector3());
+        currentAsset.position.x -= center.x;
+        currentAsset.position.z -= center.z;
+        currentAsset.position.y -= box.min.y; // ground it
+
+        // Enable shadows
+        currentAsset.traverse((child) => {
+          if (child instanceof THREE.Mesh) {
+            child.castShadow = true;
+            child.receiveShadow = true;
+          }
+        });
+
+        scene.add(currentAsset);
+
+        // Bounding box
+        const box2 = new THREE.Box3().setFromObject(currentAsset);
+        bboxHelper = new THREE.Box3Helper(box2, 0xe8a33d);
+        scene.add(bboxHelper);
+
+        // Stats
+        let meshCount = 0, triCount = 0;
+        const matSet = new Set();
+        const texSet = new Set();
+        const meshList = [];
+        currentAsset.traverse((c) => {
+          if (c.isMesh) {
+            meshCount++;
+            const geo = c.geometry;
+            let tris = 0;
+            if (geo.index) tris = geo.index.count / 3;
+            else if (geo.attributes.position) tris = geo.attributes.position.count / 3;
+            triCount += tris;
+            const mats = Array.isArray(c.material) ? c.material : [c.material];
+            mats.forEach((m) => {
+              matSet.add(m.uuid);
+              for (const key of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'emissiveMap']) {
+                if (m[key]) texSet.add(m[key].uuid);
+              }
+            });
+            meshList.push({ name: c.name || '(unnamed)', tris: Math.round(tris) });
+          }
+        });
+
+        // Classification
+        const cls = classifyAsset(currentAsset, rawDims);
+
+        // Update UI
+        document.getElementById('dim-w').textContent = rawDims.w.toFixed(3) + ' m';
+        document.getElementById('dim-h').textContent = rawDims.h.toFixed(3) + ' m';
+        document.getElementById('dim-d').textContent = rawDims.d.toFixed(3) + ' m';
+        document.getElementById('stat-meshes').textContent = meshCount;
+        document.getElementById('stat-tris').textContent = Math.round(triCount).toLocaleString();
+        document.getElementById('stat-mats').textContent = matSet.size;
+        document.getElementById('stat-textures').textContent = texSet.size;
+        document.getElementById('classification').textContent = cls.type + ' — ' + cls.detail;
+
+        // Scale display
+        updateScaledDims();
+
+        // Mesh list
+        const listEl = document.getElementById('mesh-list');
+        listEl.innerHTML = '';
+        meshList.sort((a, b) => b.tris - a.tris).slice(0, 50).forEach((m) => {
+          const div = document.createElement('div');
+          div.className = 'mesh-item';
+          div.innerHTML = `<span class="name">${m.name}</span><span class="tris">${m.tris.toLocaleString()} tris</span>`;
+          listEl.appendChild(div);
+        });
+        if (meshList.length > 50) {
+          const div = document.createElement('div');
+          div.className = 'mesh-item';
+          div.innerHTML = `<span class="name">…and ${meshList.length - 50} more</span><span class="tris"></span>`;
+          listEl.appendChild(div);
+        }
+
+        // Auto-fit camera
+        fitCamera();
+
+        document.getElementById('status').textContent = `Loaded: ${asset.label}`;
+      }, undefined, (err) => {
+        document.getElementById('status').textContent = `ERROR: ${err.message || err}`;
+        document.getElementById('classification').textContent = 'F — Unusable (load error)';
+      });
+    }
+
+    function updateScaledDims() {
+      document.getElementById('scale-value').textContent = currentScale.toFixed(3);
+      document.getElementById('scaled-w').textContent = (rawDims.w * currentScale).toFixed(3) + ' m';
+      document.getElementById('scaled-h').textContent = (rawDims.h * currentScale).toFixed(3) + ' m';
+      document.getElementById('scaled-d').textContent = (rawDims.d * currentScale).toFixed(3) + ' m';
+      if (currentAsset) {
+        currentAsset.scale.setScalar(currentScale);
+        if (bboxHelper) {
+          scene.remove(bboxHelper);
+          bboxHelper.dispose();
+          const box = new THREE.Box3().setFromObject(currentAsset);
+          bboxHelper = new THREE.Box3Helper(box, 0xe8a33d);
+          scene.add(bboxHelper);
+        }
+      }
+    }
+
+    function fitCamera() {
+      if (!currentAsset) return;
+      const box = new THREE.Box3().setFromObject(currentAsset);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const dist = maxDim * 2.5 + 5;
+      camera.position.set(center.x + dist * 0.7, center.y + dist * 0.5, center.z + dist * 0.7);
+      controls.target.copy(center);
+      controls.update();
+    }
+
+    // --- controls ---
+    document.getElementById('btn-prev').addEventListener('click', () => loadAsset(currentIdx - 1));
+    document.getElementById('btn-next').addEventListener('click', () => loadAsset(currentIdx + 1));
+    document.getElementById('btn-reset').addEventListener('click', () => fitCamera());
+    document.getElementById('scale-slider').addEventListener('input', (e) => {
+      currentScale = parseFloat(e.target.value);
+      updateScaledDims();
+    });
+
+    // keyboard shortcuts
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a') loadAsset(currentIdx - 1);
+      if (e.key === 'ArrowRight' || e.key === 'd') loadAsset(currentIdx + 1);
+      if (e.key === 'r') fitCamera();
+    });
+
+    // --- resize ---
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    // --- render loop ---
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // --- load first asset ---
+    loadAsset(0);
+  </script>
+</body>
+</html>

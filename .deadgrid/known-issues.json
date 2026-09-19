@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "issues": [
+    {
+      "id": "campaign-route-under-authored",
+      "severity": "high",
+      "status": "open",
+      "area": "cabin-to-relay",
+      "summary": "The early critical route needs stronger authored composition, landmarks, rewards, and pacing."
+    },
+    {
+      "id": "forest-road-repetition",
+      "severity": "high",
+      "status": "open",
+      "area": "world-layout",
+      "summary": "Uniform pines and long road stretches create visual repetition and dead time."
+    },
+    {
+      "id": "objective-clarity",
+      "severity": "medium",
+      "status": "open",
+      "area": "radio-generator-blackout",
+      "summary": "Objective flow and activation feedback need human gameplay confirmation after implementation."
+    },
+    {
+      "id": "agent-recon-drift",
+      "severity": "process",
+      "status": "guarded",
+      "area": "development-workflow",
+      "summary": "Local coding sessions historically consumed context on broad scans and repeated reads before editing."
+    },
+    {
+      "id": "external-ts6133-blackout-cleared-unused",
+      "severity": "build-blocking",
+      "status": "open_external",
+      "area": "src/game.ts",
+      "code": "TS6133",
+      "source": "externally_detected_current_repo_state",
+      "ownership": "another_active_development_session_may_be_responsible",
+      "summary": "blackoutCleared is declared but its value is never read.",
+      "harnessAction": "Record and fail typecheck/final regression; do not modify source."
+    },
+    {
+      "id": "external-ts2339-spawn-first-encounter-missing",
+      "severity": "build-blocking",
+      "status": "open_external",
+      "area": "src/game.ts",
+      "code": "TS2339",
+      "source": "externally_detected_current_repo_state",
+      "ownership": "another_active_development_session_may_be_responsible",
+      "summary": "spawnFirstEncounter does not exist on Game.",
+      "harnessAction": "Record and fail typecheck/final regression; do not modify source."
+    }
+  ]
+}

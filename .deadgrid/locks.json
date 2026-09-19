@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "decisions": [
+    {
+      "id": "preserve-working-save-and-progression",
+      "scope": "save/progression behavior",
+      "status": "locked",
+      "reason": "Do not redesign working progression while doing unrelated work."
+    },
+    {
+      "id": "preserve-minimap",
+      "scope": "src/game/minimap.ts",
+      "status": "locked_unless_task_targets_navigation",
+      "reason": "The current minimap is a working system."
+    },
+    {
+      "id": "preserve-viewmodel",
+      "scope": "src/weapons/viewmodel.ts",
+      "status": "locked_unless_task_targets_viewmodel_or_combat",
+      "reason": "Do not disturb weapon presentation during campaign or level work."
+    },
+    {
+      "id": "preserve-asset-normalization",
+      "scope": "src/assets/components.ts",
+      "status": "locked_unless_task_targets_assets",
+      "reason": "Do not rebuild established asset scaling or normalization incidentally."
+    },
+    {
+      "id": "human-eyes-own-taste",
+      "scope": "visual and gameplay acceptance",
+      "status": "locked",
+      "reason": "Automated checks may validate code; only the human accepts look, feel, pacing, and composition."
+    }
+  ],
+  "protectedFiles": [
+    {
+      "path": "src/game/minimap.ts",
+      "allowedModes": ["NAVIGATION", "BUGFIX", "RELEASE_QA"]
+    },
+    {
+      "path": "src/weapons/viewmodel.ts",
+      "allowedModes": ["VIEWMODEL", "GAMEPLAY", "BUGFIX", "RELEASE_QA"]
+    },
+    {
+      "path": "src/assets/components.ts",
+      "allowedModes": ["ASSETS", "VIEWMODEL", "BUGFIX", "RELEASE_QA"]
+    }
+  ]
+}

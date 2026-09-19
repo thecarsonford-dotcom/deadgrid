@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opencode.ai/tui.json",
+  "mouse": false,
+  "keybinds": {
+    "input_paste": {
+      "key": "ctrl+v",
+      "preventDefault": false
+    }
+  }
+}

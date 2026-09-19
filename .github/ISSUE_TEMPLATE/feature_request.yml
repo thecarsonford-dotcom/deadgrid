@@ -1,0 +1,34 @@
+name: Feature request
+description: Propose a focused improvement to DEADGRID
+title: "[Idea]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Player or contributor problem
+      description: What is difficult, missing, or unclear today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed change
+      description: Describe the smallest useful version of the idea.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and tradeoffs
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched Issues and Discussions for a similar proposal.
+          required: true
+        - label: I understand that implementation pull requests must follow the local-model policy.
+          required: true
+

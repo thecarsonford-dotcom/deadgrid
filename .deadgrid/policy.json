@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "finalRegression": {
+    "requiredChecks": ["typecheck", "build"],
+    "passPolicy": "all_required_checks_must_pass_for_the_same_edit_state",
+    "buildOnlyIsClean": false
+  },
+  "defaults": {
+    "sourceReadsBeforeFirstEdit": 6,
+    "sourceTokensBeforeFirstEdit": 15000,
+    "searchCallsBeforeFirstEdit": 4,
+    "sourceReadsTotal": 14,
+    "sourceTokensTotal": 32000,
+    "readsPerFileBeforeFirstEdit": 2,
+    "readsPerFileTotal": 4,
+    "editsBeforeTypecheck": 4
+  },
+  "loopControl": {
+    "blockedAttemptsBeforeAbort": 2,
+    "readOverlapThreshold": 0.8,
+    "nearStartLines": 8,
+    "overviewReadMinimumLines": 500,
+    "targetedReadMaximumLines": 400,
+    "largeFileReadsBeforeFirstEdit": 5,
+    "contextWindowTokens": 256000,
+    "firstEditDiagnosticPercent": 15,
+    "forwardProgressModes": ["BUGFIX", "LEVEL_DESIGN"],
+    "campaignMode": "LEVEL_DESIGN",
+    "taskPromptPolicy": "One root-level Markdown task file read per session; task prompts do not consume source reconnaissance budget."
+  },
+  "modes": {
+    "LEVEL_DESIGN": {
+      "keywords": ["level", "route", "road", "forest", "cabin", "relay", "tower", "checkpoint", "bunker", "poi", "world", "scatter", "terrain", "campaign", "blackout", "generator", "evac"],
+      "allowedRead": ["src/world/pois.ts", "src/world/poiBuilders.ts", "src/world/roads.ts", "src/world/scatter.ts", "src/world/wildPois.ts", "src/world/terrain.ts", "src/world/collision.ts", "src/game/missions.ts", "src/game/blackout.ts", "src/game.ts", "src/core/world.ts", "src/assets/asset-manifest.json"],
+      "allowedEdit": ["src/world/pois.ts", "src/world/poiBuilders.ts", "src/world/roads.ts", "src/world/scatter.ts", "src/world/wildPois.ts", "src/world/terrain.ts", "src/game/missions.ts", "src/game/blackout.ts", "src/game.ts"],
+      "humanQaRequired": true
+    },
+    "GAMEPLAY": {
+      "keywords": ["gameplay", "combat", "enemy", "hollow", "damage", "health", "ammo", "loot", "weapon", "input", "player", "movement"],
+      "allowedRead": ["src/game.ts", "src/player.ts", "src/input.ts", "src/drops.ts", "src/enemies/hollow.ts", "src/weapons/weapons.ts", "src/weapons/worldWeapon.ts", "src/weapons/viewmodel.ts", "src/audio.ts"],
+      "allowedEdit": ["src/game.ts", "src/player.ts", "src/input.ts", "src/drops.ts", "src/enemies/hollow.ts", "src/weapons/weapons.ts", "src/weapons/worldWeapon.ts", "src/weapons/viewmodel.ts", "src/audio.ts"],
+      "humanQaRequired": true
+    },
+    "VIEWMODEL": {
+      "keywords": ["viewmodel", "gun model", "weapon model", "ads", "recoil", "muzzle", "hands", "sleeves", "gloves"],
+      "allowedRead": ["src/weapons/viewmodel.ts", "src/weapons/weapons.ts", "src/weapons/worldWeapon.ts", "src/assets/components.ts", "src/assets/registry.ts", "src/assets/asset-manifest.json", "src/game.ts", "src/player.ts", "src/input.ts"],
+      "allowedEdit": ["src/weapons/viewmodel.ts", "src/weapons/weapons.ts", "src/weapons/worldWeapon.ts", "src/assets/components.ts", "src/assets/registry.ts", "src/game.ts"],
+      "humanQaRequired": true
+    },
+    "NAVIGATION": {
+      "keywords": ["minimap", "compass", "navigation", "objective marker", "waypoint", "hud marker"],
+      "allowedRead": ["src/game/minimap.ts", "src/game/compass.ts", "src/game/missions.ts", "src/game.ts", "style.css", "index.html"],
+      "allowedEdit": ["src/game/minimap.ts", "src/game/compass.ts", "src/game/missions.ts", "src/game.ts", "style.css", "index.html"],
+      "humanQaRequired": true
+    },
+    "VISUAL_POLISH": {
+      "keywords": ["visual", "lighting", "fog", "sky", "particles", "decal", "presentation", "polish", "readability", "color"],
+      "allowedRead": ["src/renderer.ts", "src/sky.ts", "src/particles.ts", "src/decals.ts", "src/world/props.ts", "src/world/poiBuilders.ts", "src/weapons/viewmodel.ts", "src/game.ts", "style.css", "index.html"],
+      "allowedEdit": ["src/renderer.ts", "src/sky.ts", "src/particles.ts", "src/decals.ts", "src/world/props.ts", "src/world/poiBuilders.ts", "src/game.ts", "style.css", "index.html"],
+      "humanQaRequired": true
+    },
+    "AUDIO": {
+      "keywords": ["audio", "sound", "music", "radio cue", "sfx"],
+      "allowedRead": ["src/audio.ts", "src/assets/audio.ts", "src/game.ts", "src/game/missions.ts", "src/game/blackout.ts"],
+      "allowedEdit": ["src/audio.ts", "src/assets/audio.ts", "src/game.ts", "src/game/missions.ts", "src/game/blackout.ts"],
+      "humanQaRequired": true
+    },
+    "ASSETS": {
+      "keywords": ["asset", "model", "manifest", "registry", "component", "scale", "orientation"],
+      "allowedRead": ["src/assets/asset-manifest.json", "src/assets/components.ts", "src/assets/registry.ts", "src/world/props.ts", "src/world/poiBuilders.ts", "src/weapons/worldWeapon.ts"],
+      "allowedEdit": ["src/assets/asset-manifest.json", "src/assets/components.ts", "src/assets/registry.ts", "src/world/props.ts", "src/world/poiBuilders.ts", "src/weapons/worldWeapon.ts"],
+      "humanQaRequired": true
+    },
+    "BUGFIX": {
+      "keywords": ["bug", "fix", "broken", "error", "crash", "regression", "doesn't", "does not", "wrong"],
+      "allowedRead": ["src/**/*.ts", "src/**/*.json", "style.css", "index.html", "package.json", "tsconfig.json", "vite.config.ts"],
+      "allowedEdit": ["src/**/*.ts", "src/**/*.json", "style.css", "index.html"],
+      "humanQaRequired": false
+    },
+    "RELEASE_QA": {
+      "keywords": ["release", "qa", "typecheck", "build", "verify", "test", "regression"],
+      "allowedRead": ["src/**/*.ts", "src/**/*.json", "tools/**/*.ts", "tools/**/*.mts", "tools/**/*.mjs", "package.json", "tsconfig.json", "vite.config.ts"],
+      "allowedEdit": ["src/**/*.ts", "src/**/*.json", "tools/**/*.ts", "tools/**/*.mts", "tools/**/*.mjs", "package.json"],
+      "humanQaRequired": false
+    },
+    "GENERAL": {
+      "keywords": [],
+      "allowedRead": ["src/main.ts", "src/game.ts", "package.json", "tsconfig.json"],
+      "allowedEdit": ["src/main.ts", "src/game.ts"],
+      "humanQaRequired": false
+    }
+  },
+  "forbiddenRecon": ["recursive directory enumeration", "whole-repository file listing", "unscoped grep", "reading prompt.md or important.md"],
+  "forbiddenAutomation": ["puppeteer", "qwen-vl", "screenshot-driven visual iteration"]
+}

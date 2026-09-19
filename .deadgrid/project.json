@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "project": "DEADGRID",
+  "rootMarker": ".deadgrid/project.json",
+  "gateway": {
+    "baseUrl": "http://127.0.0.1:11435",
+    "defaultModel": "qwen3.8-27b-256k",
+    "startupTimeoutSeconds": 420,
+    "routerScript": "",
+    "pythonw": ""
+  },
+  "commands": {
+    "typecheck": ["npm.cmd", "run", "typecheck"],
+    "build": ["npm.cmd", "run", "build"]
+  },
+  "humanQaOnly": [
+    "visual composition",
+    "gameplay pacing",
+    "navigation feel",
+    "weapon feel",
+    "lighting and readability"
+  ]
+}

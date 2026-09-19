@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "criticalPath": [
+    { "id": "cabin_exit", "label": "Cabin exit composition", "status": "active" },
+    { "id": "road_wreck", "label": "Authored road-wreck beat", "status": "planned" },
+    { "id": "evac_camp", "label": "Evac camp purpose and composition", "status": "planned" },
+    { "id": "relay_reveal", "label": "Infrastructure corridor and relay reveal", "status": "planned" },
+    { "id": "facility_approach", "label": "Radio facility approach", "status": "planned" },
+    { "id": "generator", "label": "Fuse, fuel, and generator clarity", "status": "planned" },
+    { "id": "blackout", "label": "Blackout arena, recovery, and continuation", "status": "planned" },
+    { "id": "checkpoint", "label": "Road density and checkpoint encounter", "status": "planned" },
+    { "id": "bunker", "label": "Bunker transition", "status": "planned" }
+  ],
+  "designContract": [
+    "Give the player direction through authored space, landmarks, sightlines, and infrastructure.",
+    "Break repeated forest and road rhythm with clusters, clearings, sparse zones, cover, and rewards.",
+    "Make every major beat serve navigation, story, tension, interaction, or reward.",
+    "Preserve working game systems unless the active task explicitly targets them."
+  ]
+}

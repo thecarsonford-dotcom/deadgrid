@@ -1,0 +1,210 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="DEADGRID — a first-person post-collapse survival shooter" />
+  <title>DEADGRID</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%230b0d10'/%3E%3Crect x='6' y='14' width='20' height='4' fill='%23e8a33d'/%3E%3Crect x='12' y='6' width='4' height='20' fill='%23e8a33d'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="game"></canvas>
+
+  <!-- screen-space effects -->
+  <div id="vignette" class="overlay"></div>
+  <div id="damage-vignette" class="overlay"></div>
+  <div id="damage-flash" class="overlay"></div>
+  <div id="underwater" class="overlay"></div>
+  <div id="blackout-tint" class="overlay"></div>
+  <div id="grain" class="overlay"></div>
+  <div id="damage-dir"><div id="damage-dir-arrow"></div></div>
+
+  <!-- center reticle / prompts -->
+  <div id="center" class="hidden">
+    <div id="crosshair">
+      <span class="ch ch-t"></span><span class="ch ch-b"></span>
+      <span class="ch ch-l"></span><span class="ch ch-r"></span>
+      <span class="ch-dot"></span>
+    </div>
+    <div id="hitmarker" class="hidden"><span class="hm hm-a"></span><span class="hm hm-b"></span><span class="hm hm-c"></span><span class="hm hm-d"></span></div>
+    <div id="use-progress" class="hidden"><div id="use-progress-fill"></div></div>
+    <div id="interact-prompt" class="hidden"><span class="key"><img src="assets/runtime/ui/kenney_input/keyboard_e.png" alt="E" width="20" height="20"></span><span id="interact-verb">SEARCH</span><span id="interact-label">—</span><span id="interact-req" class="hidden"></span></div>
+  </div>
+
+  <!-- waypoint -->
+  <div id="waypoint" class="hidden">
+    <div id="waypoint-marker">
+      <div id="waypoint-diamond"></div>
+      <div id="waypoint-dist">420m</div>
+    </div>
+    <div id="waypoint-arrow"></div>
+  </div>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <!-- top center: compass bearing strip -->
+    <div id="compass-wrap"><canvas id="compass"></canvas></div>
+
+    <!-- top left: mission -->
+    <div id="mission-panel">
+      <div class="mp-eyebrow"><span class="mp-tick"></span><span id="mission-title">WAKE UP</span></div>
+      <div class="mp-objective-row">
+        <span class="mp-marker"></span>
+        <span id="mission-objective">Search the cabin</span>
+        <span id="mission-dist" class="mp-dist hidden">120m</span>
+      </div>
+      <div id="mission-count" class="mp-count hidden"></div>
+      <div id="mission-hint" class="mp-hint hidden"></div>
+    </div>
+
+    <!-- top left, below mission: minimap -->
+    <div id="minimap-wrap">
+      <canvas id="minimap"></canvas>
+      <div id="minimap-label">TACTICAL</div>
+    </div>
+
+    <!-- top right: clock -->
+    <div id="clock-pill">
+      <span id="day-label">DAY 1</span>
+      <span class="clock-sep"></span>
+      <span id="time-label">07:40</span>
+      <span id="phase-label" class="ph-day">DAY</span>
+    </div>
+
+    <!-- notifications -->
+    <div id="notifications"></div>
+
+    <!-- mission banner (mission start / complete) -->
+    <div id="mission-banner" class="hidden">
+      <div id="mission-banner-title">SIGNAL IN THE STATIC</div>
+      <div id="mission-banner-sub">NEW MISSION</div>
+    </div>
+
+    <div id="hud-bottom">
+      <!-- bottom left: vitals -->
+      <div id="vitals">
+        <div class="vital-row" id="vital-hp">
+          <span class="vital-label">VIT</span>
+          <div class="vital-track"><div class="vital-fill hp" id="hp-fill"></div></div>
+          <span class="vital-num" id="hp-num">100</span>
+        </div>
+        <div class="vital-row" id="vital-stam">
+          <span class="vital-label">STA</span>
+          <div class="vital-track thin"><div class="vital-fill sta" id="stamina-fill"></div></div>
+          <span class="vital-num hidden" id="sta-num">100</span>
+        </div>
+        <div class="vital-row hidden" id="vital-food">
+          <span class="vital-label">FOOD</span>
+          <div class="vital-track thin"><div class="vital-fill food" id="hunger-fill"></div></div>
+          <span class="vital-num hidden"></span>
+        </div>
+        <div class="vital-row hidden" id="vital-batt">
+          <span class="vital-label" id="batt-label">BAT</span>
+          <div class="vital-track thin"><div class="vital-fill batt" id="battery-fill"></div></div>
+          <span class="vital-num hidden"></span>
+        </div>
+      </div>
+
+      <!-- bottom right: weapon -->
+      <div id="weapon-block">
+        <div id="ammo-row"><span id="ammo-mag">—</span><span class="ammo-sep">|</span><span id="ammo-reserve">—</span></div>
+        <div id="weapon-row"><span id="weapon-name">FIELD KNIFE</span><span id="fire-mode" class="hidden">AUTO</span></div>
+        <div id="slots">
+          <span class="slot" id="slot-1"><span class="slot-key">1</span><span class="slot-name" id="slot-1-name">—</span></span>
+          <span class="slot" id="slot-2"><span class="slot-key">2</span><span class="slot-name" id="slot-2-name">—</span></span>
+          <span class="slot" id="slot-3"><span class="slot-key">3</span><span class="slot-name">KNIFE</span></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="hint-bar">WASD MOVE · SHIFT SPRINT · C CROUCH · RMB AIM · R RELOAD · F LIGHT · H BANDAGE · 4 MEDKIT · TAB CARGO</div>
+  </div>
+
+  <!-- blackout banner -->
+  <div id="blackout-banner" class="hidden">
+    <div id="blackout-title">BLACKOUT</div>
+    <div id="blackout-wave">SURGE 1 OF 4</div>
+  </div>
+
+  <!-- inventory -->
+  <div id="inventory" class="modal hidden">
+    <div class="modal-inner">
+      <div class="modal-head"><h2>CARGO MANIFEST</h2><button class="ghost-btn" id="inv-close">CLOSE&nbsp;[TAB]</button></div>
+      <div class="inv-cols">
+        <div class="inv-col">
+          <h3>LOADOUT</h3>
+          <div id="inv-weapons"></div>
+        </div>
+        <div class="inv-col">
+          <h3>SUPPLIES</h3>
+          <div id="inv-items"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- story modal -->
+  <div id="story" class="modal hidden">
+    <div class="story-inner">
+      <div class="story-tag">RECOVERED DOCUMENT</div>
+      <p id="story-text"></p>
+      <button class="ghost-btn" id="story-close">STORE&nbsp;[E]</button>
+    </div>
+  </div>
+
+  <!-- pause -->
+  <div id="pause" class="modal hidden">
+    <div class="modal-inner menu">
+      <h1 class="menu-title">PAUSED</h1>
+      <button class="menu-btn" id="btn-resume">RESUME</button>
+      <button class="menu-btn" id="btn-save">SAVE</button>
+      <button class="menu-btn" id="btn-settings">SETTINGS</button>
+      <button class="menu-btn danger" id="btn-quit">RETURN TO TITLE</button>
+    </div>
+  </div>
+
+  <!-- settings -->
+  <div id="settings" class="modal hidden">
+    <div class="modal-inner">
+      <h2>SETTINGS</h2>
+      <h3>GAMEPLAY</h3>
+      <div class="setting-row"><span>MOUSE SENSITIVITY</span><input type="range" id="set-sens" min="0.2" max="3" step="0.05" /><span id="val-sens">1.0</span></div>
+      <div class="setting-row"><span>FIELD OF VIEW</span><input type="range" id="set-fov" min="60" max="110" step="1" /><span id="val-fov">75°</span></div>
+      <div class="setting-row"><span>HEAD BOB</span><input type="range" id="set-bob" min="0" max="1.5" step="0.1" /><span id="val-bob">1.0</span></div>
+      <h3>GRAPHICS</h3>
+      <div class="setting-row"><span>RENDER DISTANCE</span><input type="range" id="set-dist" min="3" max="7" step="1" /><span id="val-dist">5</span></div>
+      <div class="setting-row"><span>SHADOWS</span><input type="range" id="set-shadow" min="0" max="2" step="1" /><span id="val-shadow">2</span></div>
+      <h3>AUDIO</h3>
+      <div class="setting-row"><span>MASTER VOLUME</span><input type="range" id="set-vol" min="0" max="1" step="0.05" /><span id="val-vol">70%</span></div>
+      <button class="ghost-btn" id="set-close">BACK</button>
+    </div>
+  </div>
+
+  <!-- death -->
+  <div id="death" class="modal hidden">
+    <div class="modal-inner menu death">
+      <h1 class="menu-title danger">SIGNAL LOST</h1>
+      <div class="death-sub" id="death-text">The Hollow found you.</div>
+      <button class="menu-btn" id="btn-respawn">RELOAD LAST SAVE</button>
+      <button class="menu-btn" id="btn-death-title">RETURN TO TITLE</button>
+    </div>
+  </div>
+
+  <!-- title -->
+  <div id="title" class="title-screen">
+    <div class="title-inner">
+      <div class="title-logo"><span class="logo-dead">DEAD</span><span class="logo-grid">GRID</span></div>
+      <div class="tagline">SIGNAL LOST · GRID 7 · WILDERNESS PROTOCOL</div>
+      <div class="title-menu">
+        <button class="menu-btn" id="btn-continue" disabled>CONTINUE</button>
+        <button class="menu-btn" id="btn-new">NEW GAME</button>
+        <button class="menu-btn" id="btn-title-settings">SETTINGS</button>
+      </div>
+      <div class="title-footer"><span id="version">v0.2.0</span><span class="dot">·</span><span>SURVIVE THE HOLLOW</span></div>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

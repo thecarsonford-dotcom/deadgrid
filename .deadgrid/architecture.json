@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "domains": {
+    "orchestration": ["src/main.ts", "src/game.ts"],
+    "campaign": ["src/game/missions.ts", "src/game/blackout.ts", "src/game.ts"],
+    "navigation": ["src/game/compass.ts", "src/game/minimap.ts"],
+    "world_layout": ["src/world/pois.ts", "src/world/poiBuilders.ts", "src/world/roads.ts", "src/world/scatter.ts", "src/world/wildPois.ts"],
+    "world_rules": ["src/world/terrain.ts", "src/world/collision.ts", "src/core/world.ts", "src/core/noise.ts"],
+    "world_props": ["src/world/props.ts", "src/assets/components.ts", "src/assets/registry.ts", "src/assets/asset-manifest.json"],
+    "player": ["src/player.ts", "src/input.ts"],
+    "combat": ["src/weapons/weapons.ts", "src/weapons/worldWeapon.ts", "src/weapons/viewmodel.ts", "src/enemies/hollow.ts", "src/drops.ts"],
+    "presentation": ["src/renderer.ts", "src/sky.ts", "src/particles.ts", "src/decals.ts", "style.css", "index.html"],
+    "audio": ["src/audio.ts", "src/assets/audio.ts"],
+    "verification": ["package.json", "tsconfig.json", "vite.config.ts", "tools/smoke/smoke.ts"]
+  },
+  "largeFiles": {
+    "src/game.ts": "Read targeted ranges only.",
+    "src/world/poiBuilders.ts": "Read targeted builders only.",
+    "src/weapons/viewmodel.ts": "Read targeted weapon sections only."
+  },
+  "entryPoints": ["src/main.ts", "src/game.ts"]
+}

@@ -1,0 +1,52 @@
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Local environment and logs
+.env
+.env.*
+!.env.example
+*.log
+npm-debug.log*
+
+# Local development artifacts
+tmp_*/
+tools/qa/shots/
+dev-server*.log
+
+# Machine-specific visual QA utilities (the portable smoke test is retained)
+/tools/*.mts
+/tools/*.mjs
+/tools/qa/
+/tools/shots/
+/tools/smoke/
+
+# Raw asset intake. Only reviewed runtime assets are published.
+public/assets/incoming/
+public/assets/runtime/audio/horror_hits/
+
+# Private/local model runtime state
+.deadgrid/runtime/
+.deadgrid/xdg-*/
+.deadgrid/checkpoints.json
+.deadgrid/last-session.json
+.deadgrid/qa-state.json
+.deadgrid/task.json
+.opencode/node_modules/
+
+# Historical prompts and local handoff material
+/1.md
+/IMPORTANTPROMPT.md
+/important.disabled
+/important.md*
+/prompt.md
+/prompt2.md
+/prompt.md.backup-*
+
+# Editor and OS files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
